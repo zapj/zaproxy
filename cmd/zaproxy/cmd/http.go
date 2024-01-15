@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"github.com/sevlyar/go-daemon"
 	"github.com/spf13/cobra"
 	"github.com/zapj/zaproxy/http_proxy"
 	"log"
@@ -24,6 +25,28 @@ var httpCmd = &cobra.Command{
 	Use:   "http",
 	Short: "start http proxy, default port : 12828",
 	Run: func(cmd *cobra.Command, args []string) {
+		runDaemon, err := cmd.Flags().GetBool("daemon")
+		if err != nil {
+			return
+		}
+		if runDaemon {
+			ctx := new(daemon.Context)
+
+			d, err := ctx.Reborn()
+			if err != nil {
+				log.Fatal("Unable to run: ", err)
+			}
+			if d != nil {
+				return
+			}
+			defer func(ctx *daemon.Context) {
+				err := ctx.Release()
+				if err != nil {
+					log.Println(err)
+				}
+			}(ctx)
+		}
+
 		startServer(cmd)
 	},
 }

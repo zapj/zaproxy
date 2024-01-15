@@ -12,7 +12,15 @@ var rootCmd = &cobra.Command{
 	Long:  `简单的代理服务器`,
 	Run: func(cmd *cobra.Command, args []string) {
 		// Do Stuff Here
+		err := cmd.Help()
+		if err != nil {
+			return
+		}
 	},
+}
+
+func init() {
+	rootCmd.PersistentFlags().BoolP("daemon", "d", false, "start daemon")
 }
 
 func Execute() {
