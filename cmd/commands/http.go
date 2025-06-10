@@ -3,15 +3,16 @@ package commands
 import (
 	"context"
 	"fmt"
-	"github.com/sevlyar/go-daemon"
-	"github.com/spf13/cobra"
-	"github.com/zapj/zaproxy/http_proxy"
 	"log"
 	"net/http"
 	"net/url"
 	"os"
 	"os/signal"
 	"time"
+
+	"github.com/sevlyar/go-daemon"
+	"github.com/spf13/cobra"
+	"github.com/zapj/zaproxy/http_proxy"
 )
 
 func init() {
@@ -65,20 +66,21 @@ func startServer(cmd *cobra.Command) {
 		password = "zaproxy"
 	}
 	proxyHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		lname, lpass, ok := http_proxy.GetBasicAuth(r)
-		//log.Println(username, password)
-		if ok {
-			if username != lname && password != lpass {
+		// 认证检查
+		if username != "" && password != "" {
+			lname, lpass, ok := http_proxy.GetBasicAuth(r)
+			if !ok || username != lname || password != lpass {
 				w.Header().Set("WWW-Authenticate", `Basic realm="restricted", charset="UTF-8"`)
 				http.Error(w, "Unauthorized", http.StatusUnauthorized)
+				return
 			}
-		} else {
-			w.Header().Set("WWW-Authenticate", `Basic realm="restricted", charset="UTF-8"`)
-			http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		}
+
+		// URL解析
 		path, err := url.Parse("http://" + r.Host)
 		if err != nil {
-			panic(err)
+			log.Printf("Error parsing URL: %v", err)
+			http.Error(w, "Bad Request", http.StatusBadRequest)
 			return
 		}
 		proxy := http_proxy.NewReverseProxy(path)
