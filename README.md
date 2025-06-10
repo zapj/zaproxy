@@ -130,6 +130,24 @@ zaproxy/
 
 欢迎提交 Pull Requests 和 Issues！
 
+## 发布
+
+本项目使用 GitHub Actions 自动构建和发布。当推送新的版本标签（如 `v1.0.0`）时，将自动触发构建流程：
+
+- 自动构建 Linux (amd64/arm64) 和 Windows (amd64/arm64) 平台的二进制文件
+- 自动创建 GitHub Release
+- 自动上传构建的二进制文件到 Release
+
+### 发布新版本
+
+```bash
+# 标记新版本
+git tag v1.0.0
+
+# 推送标签到 GitHub，这将触发自动构建和发布
+git push origin v1.0.0
+```
+
 ## 许可证
 
 [License Apache 2.0]
